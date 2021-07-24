@@ -17,3 +17,5 @@
   - layouts 页面布局文件夹
 - middlewares 中间间文件夹
   - login-middlewaer.js 登录守卫中间间
+- routes 路由文件夹
+  - loginRoute.js 登录路由管理

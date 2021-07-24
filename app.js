@@ -1,8 +1,7 @@
 const express = require('express');
-const { requireLogin } = require('./middlewares/login-middleware');
+const { requireLogin } = require('./middlewares/loginMiddleware');
 const app = express();
 const port = 3000;
-// const requireLogin
 
 const server = app.listen(port, () => {
   console.log(`Server is running on port ${port}`)
@@ -13,8 +12,9 @@ app.set("view engine", 'pug');
 // 指定引擎文件
 app.set("views", "views")
 
-// localhost:3000
-
+// 关联路由
+const loginRoutes = require('./routes/loginRoute')
+app.use('/login', loginRoutes)
 app.get('/', requireLogin, (req, res, next) => {
 
   var payload = {
