@@ -15,7 +15,11 @@ app.set("views", "views")
 app.use(express.static(path.join(__dirname, 'public')))
 // 关联路由
 const loginRoutes = require('./routes/loginRoute')
+const registerRoutes = require('./routes/registerRoute')
+
 app.use('/login', loginRoutes)
+app.use('/register', registerRoutes)
+
 app.get('/', requireLogin, (req, res, next) => {
 
   var payload = {
