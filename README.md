@@ -14,7 +14,9 @@
 
 - app.js 项目主文件
 - views 页面展示文件夹
+  - login.pug 登录页面
   - layouts 页面布局文件夹
+    - login-layout.pug 登录布局
 - middlewares 中间间文件夹
   - login-middlewaer.js 登录守卫中间间
 - routes 路由文件夹
