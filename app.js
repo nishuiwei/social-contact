@@ -1,6 +1,8 @@
 const express = require('express');
+const { requireLogin } = require('./middlewares/login-middleware');
 const app = express();
 const port = 3000;
+// const requireLogin
 
 const server = app.listen(port, () => {
   console.log(`Server is running on port ${port}`)
@@ -13,7 +15,8 @@ app.set("views", "views")
 
 // localhost:3000
 
-app.get('/', (req, res, next) => {
+app.get('/', requireLogin, (req, res, next) => {
+
   var payload = {
     pageTitle: '卫慧杰'
   }
