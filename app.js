@@ -14,6 +14,9 @@ app.set("views", "views")
 // localhost:3000
 
 app.get('/', (req, res, next) => {
-  res.status(200).render("home")
+  var payload = {
+    pageTitle: '卫慧杰'
+  }
+  res.status(200).render("home", payload)
 })
 

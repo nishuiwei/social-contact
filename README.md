@@ -14,3 +14,4 @@
 
 - app.js 项目主文件
 - views 页面展示文件夹
+  - layouts 页面布局文件夹
