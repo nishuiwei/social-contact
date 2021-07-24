@@ -2,7 +2,7 @@ const express = require('express');
 const { requireLogin } = require('./middlewares/loginMiddleware');
 const app = express();
 const port = 3000;
-
+const path = require('path')
 const server = app.listen(port, () => {
   console.log(`Server is running on port ${port}`)
 })
@@ -11,7 +11,8 @@ const server = app.listen(port, () => {
 app.set("view engine", 'pug');
 // 指定引擎文件
 app.set("views", "views")
-
+// 使用静态文件夹
+app.use(express.static(path.join(__dirname, 'public')))
 // 关联路由
 const loginRoutes = require('./routes/loginRoute')
 app.use('/login', loginRoutes)
