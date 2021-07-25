@@ -36,7 +36,8 @@ app.use('/register', registerRoutes)
 app.get('/', requireLogin, (req, res, next) => {
 
   var payload = {
-    pageTitle: '卫慧杰'
+    pageTitle: '卫慧杰',
+    userLoggedIn: req.session.user
   }
   res.status(200).render("home", payload)
 })
