@@ -7,6 +7,10 @@ const server = app.listen(port, () => {
   console.log(`Server is running on port ${port}`)
 })
 
+// 配置 post 接收的数据类型
+app.use(express.json()); // 客户端发来的是json数据，就可以正常接受
+app.use(express.urlencoded({ extended: false })); // x-www-form-urlencoded
+
 // 指定模板引擎
 app.set("view engine", 'pug');
 // 指定引擎文件
