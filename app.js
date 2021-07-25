@@ -3,9 +3,11 @@ const { requireLogin } = require('./middlewares/loginMiddleware');
 const app = express();
 const port = 3000;
 const path = require('path')
-const server = app.listen(port, () => {
-  console.log(`Server is running on port ${port}`)
-})
+const dotenv = require('dotenv');
+const connectDB = require('./config/db');
+
+dotenv.config();
+connectDB();
 
 // 配置 post 接收的数据类型
 app.use(express.json()); // 客户端发来的是json数据，就可以正常接受
@@ -32,3 +34,6 @@ app.get('/', requireLogin, (req, res, next) => {
   res.status(200).render("home", payload)
 })
 
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`)
+})
