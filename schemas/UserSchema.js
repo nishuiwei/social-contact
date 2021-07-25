@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema
+
+const Schema = mongoose.Schema;
 
 const UserSchema = new Schema({
   name: { type: String, required: true, trim: true },
@@ -7,8 +8,7 @@ const UserSchema = new Schema({
   email: { type: String, required: true, trim: true, unique: true },
   password: { type: String, required: true },
   profilePic: { type: String, default: "/images/profilePic.png" },
-})
+}, { timestamps: true });
 
-const User = mongoose.model('User', UserSchema)
-
-module.export = User
+var User = mongoose.model('User', UserSchema);
+module.exports = User;

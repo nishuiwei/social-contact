@@ -1,8 +1,8 @@
 const express = require('express');
 const app = express();
 const router = express.Router()
-
-
+const User = require('./../schemas/UserSchema')
+const bcyrpt = require('bcryptjs')
 // 配置 post 接收的数据类型
 app.use(express.json()); // 客户端发来的是json数据，就可以正常接受
 app.use(express.urlencoded({ extended: false })); // x-www-form-urlencoded
@@ -21,6 +21,7 @@ app.set("views", "views")
 
 router.get('/', (req, res, next) => {
   res.status(200).render('register')
+  // User.find().then(users => res.json(users))
 })
 
 /** 
@@ -29,23 +30,43 @@ router.get('/', (req, res, next) => {
  *  @access public
 */
 
-router.post('/', (req, res, next) => {
-  console.log(req.body)
-  // var name = req.body.name.trim();
-  // var username = req.body.username.trim();
+router.post('/', async (req, res, next) => {
   const { name, username, email, password } = req.body
   const nameT = name.trim();
   const usernameT = username.trim();
   const emailT = email.trim();
   const passwordT = password.trim();
-  const payload = {};
+  const payload = req.body;
   if (nameT && usernameT && emailT && passwordT) {
     // 存储
+    // 查询 数据库是否存在username 或者 email
+    const user = await User.findOne({
+      $or: [
+        { username },
+        { email }
+      ]
+    })
+    // 判断
+    if (user === null) {
+      // 没查到 正常存储
+      const data = req.body
+      data.password = await bcyrpt.hash(password, 10);
+      User.create(data).then(user => {
+        // 配置 session
+        req.session.user = user;
+        return res.redirect('/');
+      })
+    } else {
+      // 查到了
+      if (email === user.email) {
+        payload.errorMessage = "Email already in use"
+      } else {
+        payload.errorMessage = "Username already in use"
+      }
+      res.status(400).render("register", payload);
+    }
   } else {
     payload.errorMessage = "Make sure filed has a valid value."
-    payload.name = nameT
-    payload.email = emailT
-    payload.username = usernameT
     res.status(200).render("register", payload)
   }
 })

@@ -5,7 +5,7 @@ const colors = require('colors');
 const configDB = async () => {
   try {
     const conn = await mongoose.connect(process.env.MONGO_URL, {
-      useUnifiedTopology: true,
+      useUnifiedTopology: false,
       useNewUrlParser: true,
       useCreateIndex: true,
       useUnifiedTopology: true,

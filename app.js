@@ -5,13 +5,20 @@ const port = 3000;
 const path = require('path')
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
-
+const session = require("express-session");
 dotenv.config();
 connectDB();
 
 // 配置 post 接收的数据类型
 app.use(express.json()); // 客户端发来的是json数据，就可以正常接受
 app.use(express.urlencoded({ extended: false })); // x-www-form-urlencoded
+
+// 使用 session
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: true,
+  saveUninitialized: false,
+}))
 
 // 指定模板引擎
 app.set("view engine", 'pug');
