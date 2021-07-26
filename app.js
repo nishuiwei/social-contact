@@ -29,9 +29,11 @@ app.use(express.static(path.join(__dirname, 'public')))
 // 关联路由
 const loginRoutes = require('./routes/loginRoute')
 const registerRoutes = require('./routes/registerRoute')
+const logoutRoutes = require('./routes/logoutRoute')
 
 app.use('/login', loginRoutes)
 app.use('/register', registerRoutes)
+app.use('/logout', logoutRoutes)
 
 app.get('/', requireLogin, (req, res, next) => {
 
