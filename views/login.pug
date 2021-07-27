@@ -4,7 +4,7 @@ block content
     h1 登录
     form(method="post") 
       p.errorMessage #{errorMessage}
-      input(type="text", name="loginUsername", placeholder="Username or email", required="")
-      input(type="password", name="loginPassword", placeholder="Password", required="")
+      input(type="text", name="loginUsername", value="root" placeholder="Username or email", required="")
+      input(type="password", name="loginPassword", value="123456" placeholder="Password", required="")
       input(type="submit", value="登录")
     a(href="/register") 没有账号？立即注册 
