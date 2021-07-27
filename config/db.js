@@ -9,6 +9,7 @@ const configDB = async () => {
       useNewUrlParser: true,
       useCreateIndex: true,
       useUnifiedTopology: true,
+      useFindAndModify: false
     });
     // return conn;
     console.log(`MongoDB 已连接：${conn.connection.host}`.cyan.underline)

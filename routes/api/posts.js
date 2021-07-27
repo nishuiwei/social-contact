@@ -53,11 +53,10 @@ router.post('/', async (req, res, next) => {
  *  @access public
 */
 
-router.post('/:id/like', async (req, res, next) => {
+router.put('/:id/like', async (req, res, next) => {
   // 第一: 那条消息被点赞 是被谁点的
   const postId = req.params.id;
   const userId = req.session.user._id;
-
   // 第二: 这个用户有没有对这条消息点过赞
   const isLiked = req.session.user.likes && req.session.user.likes.includes(postId);
   const option = isLiked ? "$pull" : "$addToSet"
@@ -67,8 +66,7 @@ router.post('/:id/like', async (req, res, next) => {
   // 第四: 未点赞 被点击后标记为 点赞 否则取反 存储信息表中
   const post = await Post.findByIdAndUpdate(postId, { [option]: { likes: userId } }, { new: true }).catch(err => res.sendStatus(400).json(err))
   // 将更新的数据返回
-  res.status(204).send(post)
-
+  res.status(200).send(post)
 })
 
 module.exports = router
