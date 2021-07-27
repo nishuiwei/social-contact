@@ -49,6 +49,28 @@ $(document).on('click', '.likeButton', (event) => {
   })
 })
 
+// 转发按钮
+$(document).on('click', '.retweetButton', (event) => {
+  const button = $(event.target)
+  const postId = getPostIdFromElement(button)
+  // 发起请求
+  $.ajax({
+    url: `/api/posts/${postId}/retweet`,
+    type: "POST",
+    success: (postData) => {
+      console.log(postData)
+      button.find("span").text(postData.retweetUsers.length || "")
+      if (postData.retweetUsers.includes(userLoggedIn._id)) {
+        button.addClass('active');
+        window.location.reload()
+      } else {
+        button.removeClass('active')
+        window.location.reload()
+      }
+    },
+  })
+})
+
 function getPostIdFromElement(element) {
   const isRoot = element.hasClass("post");
   const rootElement = isRoot ? element : element.closest(".post")
@@ -59,12 +81,32 @@ function getPostIdFromElement(element) {
 
 
 function cretePostHtml(postData) {
+  console.log(postData)
+  if (postData == null) return alert("post object is null");
+  // 判断是不是转发的数据
+  const isRetweet = postData.retweetData !== undefined;
+  postData = isRetweet ? postData.retweetData : postData;
+
   const postedBy = postData.postedBy
   const timestamp = timeDifference(new Date(), new Date(postData.createdAt))
   const likeButtonActiveClass = postData.likes.includes(userLoggedIn._id) ? "active" : ""
+  const retweetButtonActiveClass = postData.retweetUsers.includes(userLoggedIn._id) ? "active" : ""
+  let retweetText = "";
+  if (isRetweet) {
+    retweetText = `
+      <span>
+        <i class="fa fa-retweet"></i>
+        <a href="/profile/${postData.postedBy.username}">@${postData.postedBy.username}已转发</a>
+      </span>
+    `
+  }
+
   return (
     `
     <div class="post" data-id='${postData._id}'>
+      <div class="postActionContainer">
+        ${retweetText}
+      </div>
       <div class="mainContentContainer">
         <div class="userImageContainer">
           <img src="${postedBy.profilePic}" alt="">
@@ -84,9 +126,10 @@ function cretePostHtml(postData) {
                 <i class="fa fa-comment"></i>
               </button>
             </div>
-            <div class="postButtonContainer">
-              <button>
+            <div class="postButtonContainer green">
+              <button class="retweetButton ${retweetButtonActiveClass}">
                 <i class="fa fa-retweet"></i>
+                <span>${postData.retweetUsers.length || ""}</span>
               </button>
             </div>
             <div class="postButtonContainer red">
