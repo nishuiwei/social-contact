@@ -1,7 +1,6 @@
 $(document).ready(() => {
   // 发起请求
   $.get("/api/posts", results => {
-    console.log(results)
     outputPosts(results, $('.postsContainer'))
   })
 })

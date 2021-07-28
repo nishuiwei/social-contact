@@ -1,8 +1,11 @@
 // 监听 textarea 内容变化
-$('#postTextarea').keyup(event => {
+$('#postTextarea, #replyTextarea').keyup(event => {
   const textbox = $(event.target);
   const value = textbox.val().trim();
-  const submitButton = $('#submitPostButton');
+  const isModal = textbox.parents(".modal").length == 1;
+  console.log(isModal)
+  const submitButton = !isModal ? $('#submitPostButton') : $('#submitReplyButton');
+
   if (value == "") {
     submitButton.prop("disabled", true)
     return
@@ -12,21 +15,33 @@ $('#postTextarea').keyup(event => {
 })
 
 // 发布状态按钮
-$("#submitPostButton").click((event) => {
+$("#submitPostButton, #submitReplyButton").click((event) => {
   const button = $(event.target);
-  const textbox = $('#postTextarea');
+  const isModal = button.parents(".modal").length == 1;
+  console.log(isModal)
+  const textbox = !isModal ? $('#postTextarea') : $("#replyTextarea");
+
   const data = {
     content: textbox.val()
   }
-  // 发起请求
 
+  if (isModal) {
+    const id = button.data().id;
+    // console.log(id)
+    if (id == null) return alert('Button id is null');
+    data.replyTo = id;
+  }
+  // 发起请求
   // /api/posts == http://localhost:3000/api/posts
-  $.post("/api/posts", data, (postData, status, xhr) => {
-    // console.log(postData)
-    const html = cretePostHtml(postData);
-    $('.postsContainer').prepend(html)
-    textbox.val("")
-    button.prop('disabled', true)
+  $.post("/api/posts", data, (postData) => {
+    if (postData.replyTo) {
+      location.reload()
+    } else {
+      const html = cretePostHtml(postData);
+      $('.postsContainer').prepend(html)
+      textbox.val("")
+      button.prop('disabled', true)
+    }
   })
 })
 
@@ -58,7 +73,6 @@ $(document).on('click', '.retweetButton', (event) => {
     url: `/api/posts/${postId}/retweet`,
     type: "POST",
     success: (postData) => {
-      console.log(postData)
       button.find("span").text(postData.retweetUsers.length || "")
       if (postData.retweetUsers.includes(userLoggedIn._id)) {
         button.addClass('active');
@@ -71,6 +85,25 @@ $(document).on('click', '.retweetButton', (event) => {
   })
 })
 
+$("#replyModal").on('shown.bs.modal', (event) => {
+  // relatedTarget 可以获取
+  const button = $(event.relatedTarget);
+  const postId = getPostIdFromElement(button)
+  // console.log(postId)
+  $('#submitReplyButton').attr('data-id', postId)
+  // 获取当前数据
+  $.get('/api/posts/' + postId, result => {
+    // console.log(result)
+    outputPosts(result, $('#originalPostContainer'))
+  })
+})
+
+$("#replyModal").on('hidden.bs.modal', (event) => {
+  $('#originalPostContainer').html("")
+})
+
+
+
 function getPostIdFromElement(element) {
   const isRoot = element.hasClass("post");
   const rootElement = isRoot ? element : element.closest(".post")
@@ -81,7 +114,6 @@ function getPostIdFromElement(element) {
 
 
 function cretePostHtml(postData) {
-  console.log(postData)
   if (postData == null) return alert("post object is null");
   // 判断是不是转发的数据
   const isRetweet = postData.retweetData !== undefined;
@@ -92,12 +124,26 @@ function cretePostHtml(postData) {
   const likeButtonActiveClass = postData.likes.includes(userLoggedIn._id) ? "active" : ""
   const retweetButtonActiveClass = postData.retweetUsers.includes(userLoggedIn._id) ? "active" : ""
   let retweetText = "";
+  let replyFlag = "";
   if (isRetweet) {
     retweetText = `
       <span>
         <i class="fa fa-retweet"></i>
         <a href="/profile/${postData.postedBy.username}">@${postData.postedBy.username}已转发</a>
       </span>
+    `
+  }
+  if (postData.replyTo) {
+    if (!postData.replyTo._id) {
+      return alert('replyTo is not populated')
+    } else if (!postData.replyTo.postedBy._id) {
+      return alert('postedBy is not populated')
+    }
+    const replyToUsername = postData.replyTo.postedBy.username;
+    replyFlag = `
+      <div class="reply">
+        <a href="/profile/${replyToUsername}">@${replyToUsername}</a>的评论
+      </div>
     `
   }
 
@@ -117,12 +163,13 @@ function cretePostHtml(postData) {
             <span class="username">@${postedBy.username}</span>
             <span class="date">${timestamp}</span>
           </div>
+          ${replyFlag}
           <div class="postBody">
             <span>${postData.content}</span>
           </div>
           <div class="postFooter">
             <div class="postButtonContainer">
-              <button>
+              <button data-bs-toggle="modal" data-bs-target="#replyModal">
                 <i class="fa fa-comment"></i>
               </button>
             </div>
@@ -171,5 +218,19 @@ function timeDifference(current, previous) {
   }
   else {
     return Math.round(elapsed / msPerYear) + ' years ago';
+  }
+}
+
+function outputPosts(results, container) {
+  container.html("");
+  if (!Array.isArray(results)) {
+    results = [results]
+  }
+  results.forEach(result => {
+    const html = cretePostHtml(result);
+    container.append(html);
+  })
+  if (results.length == 0) {
+    container.append("<span class='noResults'>Nothing to show. </span>")
   }
 }

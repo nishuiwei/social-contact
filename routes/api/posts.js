@@ -6,15 +6,17 @@ const User = require('./../../schemas/UserSchema')
 /**
  *  @route GET /
  *  @description 获取信息接口
- *  @access public
+ *  @access private
 */
 
 router.get('/', async (req, res, next) => {
   await Post.find()
     .populate("postedBy")
     .populate("retweetData")
+    .populate("replyTo")
     .sort({ "createdAt": -1 })
     .then(async results => {
+      results = await User.populate(results, { path: 'replyTo.postedBy' })
       results = await User.populate(results, { path: 'retweetData.postedBy' })
       res.status(200).send(results)
     })
@@ -27,10 +29,15 @@ router.get('/', async (req, res, next) => {
 /**
  *  @route POST /
  *  @description POSTS接口
- *  @access public
+ *  @access private
 */
 
 router.post('/', async (req, res, next) => {
+  // if (req.body.replyTo) {
+  //   console.log(req.body.replyTo)
+  //   return;
+  // }
+
   // 判断客户端是否传递参数
   if (!req.body.content) {
     return res.status(400).json({ error: "params is valid" })
@@ -40,6 +47,10 @@ router.post('/', async (req, res, next) => {
   const postData = {
     content: req.body.content,
     postedBy: req.session.user
+  }
+
+  if (req.body.replyTo) {
+    postData.replyTo = req.body.replyTo;
   }
 
   // 插入数据 到 数据库
@@ -54,7 +65,7 @@ router.post('/', async (req, res, next) => {
 /**
  *  @route PUT /:id/like
  *  @description 点赞和取消点赞接口
- *  @access public
+ *  @access private
 */
 
 router.put('/:id/like', async (req, res, next) => {
@@ -100,6 +111,26 @@ router.post('/:id/retweet', async (req, res, next) => {
   const post = await Post.findByIdAndUpdate(postId, { [option]: { retweetUsers: userId } }, { new: true }).catch(err => res.sendStatus(400).json(err))
   // 将更新的数据返回
   res.status(200).send(post)
+})
+
+/** 
+ *  @route GET /:id
+ *  @description 获取单个信息接口
+ *  @access private
+*/
+
+router.get('/:id', async (req, res, next) => {
+  const postId = req.params.id
+  await Post.findOne({ _id: postId })
+    .populate("postedBy")
+    .populate("retweetData")
+    .then(async results => {
+      res.status(200).send(results)
+    })
+    .catch(error => {
+      console.log(error);
+      res.sendStatus(400);
+    })
 })
 
 

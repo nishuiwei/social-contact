@@ -6,3 +6,22 @@ mixin createPostForm(userLoggedIn)
       textarea#postTextarea(placeholder="what's happening?")
       .buttonContainer 
       button#submitPostButton(disabled="") 发布
+
+mixin createReplyModel(userLoggedIn) 
+  #replyModal.modal.fade(tabindex='-1', aria-labelledby='replyModal', aria-hidden='true')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          h5#replyModal.modal-title 消息回复
+          button.btn-close(type='button', data-bs-dismiss='modal', aria-label='Close')
+        .modal-body
+          #originalPostContainer
+          .postFormContainer
+            .userImageContainer 
+              img(src=userLoggedIn.profilePic, alt="users's profile pictrue")
+            .textareaContainer 
+              textarea#replyTextarea(placeholder="what's happening?")
+        .modal-footer
+          button.btn.btn-secondary(type='button', data-bs-dismiss='modal') 关闭
+          button#submitReplyButton.btn.btn-primary(type='button' disabled="") 回复
+
