@@ -85,6 +85,15 @@ $(document).on('click', '.retweetButton', (event) => {
   })
 })
 
+// 点击消息跳转
+$(document).on('click', '.post', (event) => {
+  const element = $(event.target);
+  const postId = getPostIdFromElement(element);
+  if (postId !== undefined && !element.is("button")) {
+    window.location.href = '/posts/' + postId;
+  }
+})
+
 $("#replyModal").on('shown.bs.modal', (event) => {
   // relatedTarget 可以获取
   const button = $(event.relatedTarget);
@@ -98,7 +107,7 @@ $("#replyModal").on('shown.bs.modal', (event) => {
   })
 })
 
-$("#replyModal").on('hidden.bs.modal', (event) => {
+$("#replyModal").on('hidden.bs.modal', () => {
   $('#originalPostContainer').html("")
 })
 
@@ -114,6 +123,7 @@ function getPostIdFromElement(element) {
 
 
 function cretePostHtml(postData) {
+  // console.log(postData)
   if (postData == null) return alert("post object is null");
   // 判断是不是转发的数据
   const isRetweet = postData.retweetData !== undefined;

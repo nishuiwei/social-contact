@@ -26,6 +26,30 @@ router.get('/', async (req, res, next) => {
     })
 })
 
+
+/** 
+ *  @route GET /:id
+ *  @description 获取单个信息接口
+ *  @access private
+*/
+
+router.get('/:id', async (req, res, next) => {
+  const postId = req.params.id
+  await Post.findOne({ _id: postId })
+    .populate("postedBy")
+    .populate("retweetData")
+    .populate("replyTo")
+    .then(async results => {
+      results = await User.populate(results, { path: 'replyTo.postedBy' })
+      results = await User.populate(results, { path: 'retweetData.postedBy' })
+      res.status(200).send(results)
+    })
+    .catch(error => {
+      console.log(error);
+      res.sendStatus(400);
+    })
+})
+
 /**
  *  @route POST /
  *  @description POSTS接口
@@ -54,7 +78,7 @@ router.post('/', async (req, res, next) => {
   }
 
   // 插入数据 到 数据库
-  await Post.create(postData).then(async result => {
+  Post.create(postData).then(async result => {
     result = await User.populate(result, { path: "postedBy" })
     res.status(201).send(result)
   }).catch(err => {
@@ -113,25 +137,6 @@ router.post('/:id/retweet', async (req, res, next) => {
   res.status(200).send(post)
 })
 
-/** 
- *  @route GET /:id
- *  @description 获取单个信息接口
- *  @access private
-*/
-
-router.get('/:id', async (req, res, next) => {
-  const postId = req.params.id
-  await Post.findOne({ _id: postId })
-    .populate("postedBy")
-    .populate("retweetData")
-    .then(async results => {
-      res.status(200).send(results)
-    })
-    .catch(error => {
-      console.log(error);
-      res.sendStatus(400);
-    })
-})
 
 
 module.exports = router
