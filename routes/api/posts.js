@@ -53,6 +53,21 @@ router.get('/:id', async (req, res, next) => {
   res.status(200).send(results)
 })
 
+/** 
+ *  @route DELETE /:id
+ *  @description 實現刪除信息接口
+ *  @access private
+*/
+
+router.delete('/:id', async (req, res, next) => {
+  const postId = req.params.id
+  await Post.findOneAndDelete(postId).then(() => {
+    res.sendStatus(202)
+  }).catch(err => {
+    res.sendStatus(400).json(err)
+  })
+})
+
 /**
  *  @route POST /
  *  @description POSTS接口

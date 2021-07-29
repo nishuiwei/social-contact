@@ -25,3 +25,19 @@ mixin createReplyModel(userLoggedIn)
           button.btn.btn-secondary(type='button', data-bs-dismiss='modal') 关闭
           button#submitReplyButton.btn.btn-primary(type='button' disabled="") 回复
 
+mixin createDeletePostModel() 
+  #deletePostModal.modal.fade(tabindex='-1', aria-labelledby='deletePostModal', aria-hidden='true')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          h5#deletePostModal.modal-title 消息刪除
+          button.btn-close(type='button', data-bs-dismiss='modal', aria-label='Close')
+        .modal-body
+          p 確定刪除該條消息麽？
+        .modal-footer
+          button.btn.btn-secondary(type='button', data-bs-dismiss='modal') 关闭
+          button#deletePostButton.btn.btn-primary(type='button') 刪除
+
+mixin createPostModals(userLoggedIn)
+  +createReplyModel(userLoggedIn)
+  +createDeletePostModel()

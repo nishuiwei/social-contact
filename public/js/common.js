@@ -94,6 +94,7 @@ $(document).on('click', '.post', (event) => {
   }
 })
 
+// 回復彈窗
 $("#replyModal").on('shown.bs.modal', (event) => {
   // relatedTarget 可以获取
   const button = $(event.relatedTarget);
@@ -109,6 +110,31 @@ $("#replyModal").on('shown.bs.modal', (event) => {
 
 $("#replyModal").on('hidden.bs.modal', () => {
   $('#originalPostContainer').html("")
+})
+
+// 刪除彈窗
+$('#deletePostModal').on("shown.bs.modal", (event) => {
+  const button = $(event.relatedTarget);
+  const postId = getPostIdFromElement(button)
+
+  $('#deletePostButton').attr("data-id", postId)
+})
+
+$('#deletePostModal').click(event => {
+  const postId = $(event.target).data().id
+  // 發起刪除請求接口
+  $.ajax({
+    url: '/api/posts/' + postId,
+    type: 'DELETE',
+    success: (data, status, xhr) => {
+      if (xhr.status != 202) {
+        alert("could not delete the post")
+        return;
+      }
+
+      location.reload()
+    }
+  })
 })
 
 function getPostIdFromElement(element) {
@@ -132,7 +158,7 @@ function createPostHtml(postData, largeFont = false) {
   const retweetButtonActiveClass = postData.retweetUsers.includes(userLoggedIn._id) ? "active" : ""
   let retweetText = "";
   let replyFlag = "";
-  let largeFontClass = !largeFont ? 'largeFont' : ''
+  // let largeFontClass = !largeFont ? 'largeFont' : ''
   if (isRetweet) {
     retweetText = `
       <span>
@@ -154,10 +180,20 @@ function createPostHtml(postData, largeFont = false) {
       </div>
     `
   }
+  // 刪除按鈕
+  let buttons = "";
+  // 判斷是不是當前登陸用戶的消息
+  if (postData.postedBy._id == userLoggedIn._id) {
+    buttons = `
+      <button data-id="${postData._id}" data-bs-toggle="modal" data-bs-target="#deletePostModal">
+        <i class="fa fa-times"></i>
+      </button>
+    `
+  }
 
   return (
     `
-    <div class="post ${largeFontClass}" data-id='${postData._id}'>
+    <div class="post" data-id='${postData._id}'>
       <div class="postActionContainer">
         ${retweetText}
       </div>
@@ -170,6 +206,7 @@ function createPostHtml(postData, largeFont = false) {
             <a href="/profile/username" class="displayName">${postedBy.name}</a>
             <span class="username">@${postedBy.username}</span>
             <span class="date">${timestamp}</span>
+            ${buttons}
           </div>
           ${replyFlag}
           <div class="postBody">
@@ -242,7 +279,6 @@ function outputPosts(results, container) {
     container.append("<span class='noResults'>Nothing to show. </span>")
   }
 }
-
 
 function outputPostsWithsReplies(result, container) {
   container.html("");
