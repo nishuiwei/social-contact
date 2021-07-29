@@ -23,6 +23,9 @@ block content
           a(href=`/profile/${profileUser.username}/follows`) 
             span.value #{0}
             span 粉丝
+    .tabsContainer 
+      +createTab("消息", `/profile/${profileUser.username}`, true)
+      +createTab("评论", `/profile/${profileUser.username}/replies`, false)
     .postsContainer
     +createPostModals(userLoggedIn)
 block scripts
