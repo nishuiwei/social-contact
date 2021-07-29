@@ -3,6 +3,22 @@ const router = express.Router()
 const Post = require('./../../schemas/PostsSchema');
 const User = require('./../../schemas/UserSchema')
 
+async function getPosts(filter) {
+  let results = await Post.find(filter)
+    .populate("postedBy")
+    .populate("retweetData")
+    .populate("replyTo")
+    .sort({ "createdAt": -1 })
+    .catch(error => {
+      console.log(error);
+      res.sendStatus(400);
+    })
+
+  results = await User.populate(results, { path: 'replyTo.postedBy' })
+  results = await User.populate(results, { path: 'retweetData.postedBy' })
+  return results;
+}
+
 /**
  *  @route GET /
  *  @description 获取信息接口
@@ -10,20 +26,8 @@ const User = require('./../../schemas/UserSchema')
 */
 
 router.get('/', async (req, res, next) => {
-  await Post.find()
-    .populate("postedBy")
-    .populate("retweetData")
-    .populate("replyTo")
-    .sort({ "createdAt": -1 })
-    .then(async results => {
-      results = await User.populate(results, { path: 'replyTo.postedBy' })
-      results = await User.populate(results, { path: 'retweetData.postedBy' })
-      res.status(200).send(results)
-    })
-    .catch(error => {
-      console.log(error);
-      res.sendStatus(400);
-    })
+  const results = await getPosts({});
+  res.status(200).send(results)
 })
 
 
@@ -35,19 +39,18 @@ router.get('/', async (req, res, next) => {
 
 router.get('/:id', async (req, res, next) => {
   const postId = req.params.id
-  await Post.findOne({ _id: postId })
-    .populate("postedBy")
-    .populate("retweetData")
-    .populate("replyTo")
-    .then(async results => {
-      results = await User.populate(results, { path: 'replyTo.postedBy' })
-      results = await User.populate(results, { path: 'retweetData.postedBy' })
-      res.status(200).send(results)
-    })
-    .catch(error => {
-      console.log(error);
-      res.sendStatus(400);
-    })
+  let postData = await getPosts({ _id: postId });
+  // 单个消息
+  postData = postData[0]
+  let results = {
+    postData
+  }
+  // 所有评论消息
+  if (postData.replyTo !== undefined) {
+    results.replyTo = postData.replyTo
+  }
+  results.replies = await getPosts({ replyTo: postId })
+  res.status(200).send(results)
 })
 
 /**
@@ -57,10 +60,6 @@ router.get('/:id', async (req, res, next) => {
 */
 
 router.post('/', async (req, res, next) => {
-  // if (req.body.replyTo) {
-  //   console.log(req.body.replyTo)
-  //   return;
-  // }
 
   // 判断客户端是否传递参数
   if (!req.body.content) {

@@ -37,7 +37,7 @@ $("#submitPostButton, #submitReplyButton").click((event) => {
     if (postData.replyTo) {
       location.reload()
     } else {
-      const html = cretePostHtml(postData);
+      const html = createPostHtml(postData);
       $('.postsContainer').prepend(html)
       textbox.val("")
       button.prop('disabled', true)
@@ -102,16 +102,14 @@ $("#replyModal").on('shown.bs.modal', (event) => {
   $('#submitReplyButton').attr('data-id', postId)
   // 获取当前数据
   $.get('/api/posts/' + postId, result => {
-    // console.log(result)
-    outputPosts(result, $('#originalPostContainer'))
+    console.log(result)
+    outputPosts(result.postData, $('#originalPostContainer'))
   })
 })
 
 $("#replyModal").on('hidden.bs.modal', () => {
   $('#originalPostContainer').html("")
 })
-
-
 
 function getPostIdFromElement(element) {
   const isRoot = element.hasClass("post");
@@ -122,8 +120,7 @@ function getPostIdFromElement(element) {
 }
 
 
-function cretePostHtml(postData) {
-  // console.log(postData)
+function createPostHtml(postData, largeFont = false) {
   if (postData == null) return alert("post object is null");
   // 判断是不是转发的数据
   const isRetweet = postData.retweetData !== undefined;
@@ -135,6 +132,7 @@ function cretePostHtml(postData) {
   const retweetButtonActiveClass = postData.retweetUsers.includes(userLoggedIn._id) ? "active" : ""
   let retweetText = "";
   let replyFlag = "";
+  let largeFontClass = !largeFont ? 'largeFont' : ''
   if (isRetweet) {
     retweetText = `
       <span>
@@ -159,7 +157,7 @@ function cretePostHtml(postData) {
 
   return (
     `
-    <div class="post" data-id='${postData._id}'>
+    <div class="post ${largeFontClass}" data-id='${postData._id}'>
       <div class="postActionContainer">
         ${retweetText}
       </div>
@@ -237,10 +235,29 @@ function outputPosts(results, container) {
     results = [results]
   }
   results.forEach(result => {
-    const html = cretePostHtml(result);
+    const html = createPostHtml(result);
     container.append(html);
   })
   if (results.length == 0) {
     container.append("<span class='noResults'>Nothing to show. </span>")
   }
+}
+
+
+function outputPostsWithsReplies(result, container) {
+  container.html("");
+  // 如果有评论消息，那就展示
+  if (result.replyTo !== undefined && result.replyTo._id !== undefined) {
+    const html = createPostHtml(result.replyTo);
+    container.append(html)
+  }
+
+  // 展示消息
+  const mianPostHtml = createPostHtml(result.postData, true)
+  container.append(mianPostHtml)
+
+  result.replies.forEach(result => {
+    const html = createPostHtml(result);
+    container.append(html);
+  })
 }
