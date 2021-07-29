@@ -1,0 +1,29 @@
+extends layouts/main-layout.pug
+block content
+  if !profileUser
+    span.errorMessage Check the url you are trying to access
+  else 
+    .profileHeaderContainer 
+      .coverPhotoContainer 
+        .userImageContainer 
+          img(src=profileUser.profilePic, alt="User Profile Image")
+      .profileButtonsContainer
+        if profileUser._id != userLoggedIn._id
+          a.profileButton(href=`/message/${profileUser._id}`)
+            i.fa.fa-envelope
+          +createFollowButton(profileUser, false)
+      .userDetailsContainer 
+        span.displayName #{profileUser.name}
+        span.username @#{profileUser.username}
+        span.description #{profileUser.description}
+        .followersContainer 
+          a(href=`/profile/${profileUser.username}/following`) 
+            span.value #{0}
+            span 关注
+          a(href=`/profile/${profileUser.username}/follows`) 
+            span.value #{0}
+            span 粉丝
+    .postsContainer
+    +createPostModals(userLoggedIn)
+block scripts
+  script(src="/js/profile.js")

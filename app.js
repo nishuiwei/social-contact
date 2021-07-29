@@ -31,6 +31,7 @@ const loginRoutes = require('./routes/loginRoute')
 const registerRoutes = require('./routes/registerRoute')
 const logoutRoutes = require('./routes/logoutRoute')
 const postRoutes = require('./routes/postRoute')
+const profileRoutes = require('./routes/profileRoute')
 
 // Api routes
 const postsApiRoute = require("./routes/api/posts")
@@ -38,7 +39,8 @@ const postsApiRoute = require("./routes/api/posts")
 app.use('/login', loginRoutes)
 app.use('/register', registerRoutes)
 app.use('/logout', logoutRoutes)
-app.use('/posts', postRoutes)
+app.use('/posts', requireLogin, postRoutes)
+app.use('/profile', requireLogin, profileRoutes)
 
 // Api use
 app.use('/api/posts', postsApiRoute)

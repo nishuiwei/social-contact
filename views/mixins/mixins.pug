@@ -41,3 +41,8 @@ mixin createDeletePostModel()
 mixin createPostModals(userLoggedIn)
   +createReplyModel(userLoggedIn)
   +createDeletePostModel()
+
+mixin createFollowButton(user, isFollow)
+   - text = isFollow ? "已关注" : "关注";
+   - buttonClass = isFollow ? "followButton following" : "followButton"
+   button(class=buttonClass, data-user=user._id) #{text}
