@@ -11,6 +11,8 @@ const UserSchema = new Schema({
   likes: [{ type: Schema.Types.ObjectId, ref: "Post" }],
   // 从用户角度考虑: 该用户转发了那条消息
   retweets: [{ type: Schema.Types.ObjectId, ref: "Post" }],
+  following: [{ type: Schema.Types.ObjectId, ref: "User" }],
+  followers: [{ type: Schema.Types.ObjectId, ref: "User" }],
 }, { timestamps: true });
 
 var User = mongoose.model('User', UserSchema);

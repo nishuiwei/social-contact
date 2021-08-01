@@ -137,6 +137,32 @@ $('#deletePostModal').click(event => {
   })
 })
 
+// 关注事件
+$(document).on('click', '.followButton', (event) => {
+  const button = $(event.target)
+  const userId = button.data().user
+  // console.log(userId)
+  // 发起请求
+  $.ajax({
+    url: `/api/users/${userId}/follow`,
+    type: "PUT",
+    success: (data, status, xhr) => {
+      // console.log(data)
+      if (xhr.status == 404) {
+        alert("user not found")
+        return
+      }
+      if (data.following && data.following.includes(userId)) {
+        button.addClass("following")
+        button.text("已关注")
+      } else {
+        button.removeClass('following')
+        button.text("关注")
+      }
+    }
+  })
+})
+
 function getPostIdFromElement(element) {
   const isRoot = element.hasClass("post");
   const rootElement = isRoot ? element : element.closest(".post")

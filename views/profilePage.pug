@@ -3,6 +3,10 @@ block content
   if !profileUser
     span.errorMessage Check the url you are trying to access
   else 
+    script.
+      const userLoggedInJs = '!{userLoggedIn.following}'
+      const profileUserId = '!{profileUser._id}'
+      const isMessage = '!{isMessage}' || 1
     .profileHeaderContainer 
       .coverPhotoContainer 
         .userImageContainer 
@@ -11,7 +15,7 @@ block content
         if profileUser._id != userLoggedIn._id
           a.profileButton(href=`/message/${profileUser._id}`)
             i.fa.fa-envelope
-          +createFollowButton(profileUser, false)
+          +createFollowButton(profileUser, userLoggedInJs != null)
       .userDetailsContainer 
         span.displayName #{profileUser.name}
         span.username @#{profileUser.username}
@@ -24,8 +28,8 @@ block content
             span.value #{0}
             span 粉丝
     .tabsContainer 
-      +createTab("消息", `/profile/${profileUser.username}`, true)
-      +createTab("评论", `/profile/${profileUser.username}/replies`, false)
+      +createTab("消息", `/profile/${profileUser.username}`, isMessage == 1 || true)
+      +createTab("评论", `/profile/${profileUser.username}/replies`, isMessage == 0)
     .postsContainer
     +createPostModals(userLoggedIn)
 block scripts

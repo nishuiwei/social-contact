@@ -35,7 +35,7 @@ const profileRoutes = require('./routes/profileRoute')
 
 // Api routes
 const postsApiRoute = require("./routes/api/posts")
-
+const usersApiRoute = require("./routes/api/users")
 app.use('/login', loginRoutes)
 app.use('/register', registerRoutes)
 app.use('/logout', logoutRoutes)
@@ -44,11 +44,12 @@ app.use('/profile', requireLogin, profileRoutes)
 
 // Api use
 app.use('/api/posts', postsApiRoute)
+app.use('/api/users', usersApiRoute)
 
 app.get('/', requireLogin, (req, res, next) => {
 
   var payload = {
-    pageTitle: '卫慧杰',
+    pageTitle: req.session.user.name,
     userLoggedIn: req.session.user,
     userLoggedInJs: JSON.stringify(req.session.user)
   }
